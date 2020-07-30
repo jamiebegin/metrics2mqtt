@@ -17,12 +17,18 @@ Start sending metrics!
 
 This will create the necessary MQTT topics and start sending virtual memory and CPU utilization metrics. 
  - The `--name` paramter is used for the friendly name of the sensor in Home Assistant and for the MQTT topic names. It is the only required parameter. Here, I'm using "NUC" since my primary server is an Intel NUC.
- - The `--cpu=60` parameter is the collection interval for the CPU metrics. Here we're overserving CPU metrics for 60 seconds and then reporting the average value to MQTT. A good value for this parameter is anywhere between 60 and 1800 seconds (1 to 15 minutes).
+ - The `--cpu=60` parameter is the collection interval for the CPU metrics. Here CPU metrics are gathered for 60 seconds and then the average value is published to MQTT state topic for the sensor. A good value for this parameter is anywhere between 60 and 1800 seconds (1 to 15 minutes).
  - The `--vm` flag indicates that virtual memory (RAM) metrics should also be published.
  - `-vvvvv` (five v's) specifies debug-level logging to the console. Reduce the quantity of v's to reduce the logging verbosity.
  
 ## Usage with Home Assistant (HA)
-Once `psutil-mqtt` is collecting data and publishing it to MQTT we can do something with that data in Home Assistant. First a few assumptions:
+Once `psutil-mqtt` is collecting data and publishing it to MQTT we can do something with that data in Home Assistant. 
+
+Using the default prefix and a system name of `NUC` (the name of my server), the following state can be found in the "States" section of Developer Tools in HA:
+
+![Home Assistant Developer Tools screenshot](https://github.com/jamiebegin/psutil-mqtt/blob/master/docs/dev_tools_example.png?raw=true)
+
+A few assumptions:
 - **Home Assistant is already configured to use a MQTT broker.** Setting up MQTT and HA is beyond the scope of this documentation. However, there are a lot of great tutorials on YouTube. Either the (recently deprecated internal broker, or preferably an external broker like [Mosquitto](https://mosquitto.org/)) will need to be installed and the HA MQTT intergration configured. I run both HA and Mosquitto in separate Docker containers on the same host and the config works well.
 - **The HA MQTT integration is configured to use `homeassistant` as the MQTT autodiscovery prefix.** This is the default for the integration and also the default for `psutil-mqtt`. If you have changed this from the default, use the `--prefix` parameter to specify the correct one.
 - **The MQTT broker is running on the same host you want to collect metrics from.** If not, specify either the hostname or IP address of your MQTT broker by using the `--broker` parameter.
