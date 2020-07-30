@@ -3,7 +3,7 @@ import sys
 import signal
 import argparse
 import logging
-import json
+import json, jsons
 import paho.mqtt.client as mqtt
 import psutil
 
@@ -72,28 +72,23 @@ class PSUtilDaemon(object):
             logger.critical("Exiting after creating new topic: {}".format(p))  
             self._cleanup()
 
+    def clean(self):
+        raise NotImplementedError("Clean function doesn't work yet.")
+
+    def cpu(self):
+        cpu_times = psutil.cpu_times_percent(interval=60, percpu=False)
+        new_state = "{:.1f}".format(100.0 - cpu_times.idle)
+        attrs = jsons.dump(cpu_times)
+        logger.debug("Publishing '{}' to {}".format(json.dumps(new_state), self.topics['state']))
+        self.client.publish(self.topics['state'], new_state, retain=False, qos=1)
+        logger.debug("Publishing '{}' to {}".format(json.dumps(attrs), self.topics['attrs']))
+        self.client.publish(self.topics['attrs'], json.dumps(attrs), retain=False, qos=1)
+
     def monitor(self):
         self.config()
-        while True:
-            cpu_times = psutil.cpu_times_percent(interval=60, percpu=False)
-            new_state = "{:.1f}".format(100.0 - cpu_times.idle)
-            attrs = {}
-            attrs['user'] = cpu_times.user
-            attrs['nice'] = cpu_times.nice
-            attrs['system'] = cpu_times.system
-            attrs['idle'] = cpu_times.idle
-            attrs['iowait'] = cpu_times.iowait            
-            attrs['irq'] = cpu_times.irq
-            attrs['softirq'] = cpu_times.softirq
-            attrs['steal'] = cpu_times.steal
-            attrs['guest'] = cpu_times.guest
-            attrs['guest_nice'] = cpu_times.guest_nice
-            msgs = [{'topic': self.topics['state'], 'payload': new_state},
-                    {'topic': self.topics['attrs'], 'payload': json.dumps(attrs)}]
-            #logger.debug("Publishing '{}' to {}".format(json.dumps(state), self.topics['state']))
-            self.client.publish(self.topics['state'], new_state, retain=False, qos=1)
-            self.client.publish(self.topics['attrs'], json.dumps(attrs), retain=False, qos=1)
-            logger.debug(cpu_times)
+            while True:
+                self.cpu()
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
