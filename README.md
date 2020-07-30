@@ -12,11 +12,11 @@ pip install psutil paho-mqtt
 ```
 Start sending metrics!
 ```bash
-./psutil-mqtt.py --name Server1 --cpu=60 --vm -vvvvv
+./psutil-mqtt.py --name NUC --cpu=60 --vm -vvvvv
 ```
 
 This will create the necessary MQTT topics and start sending virtual memory and CPU utilization metrics. 
- - The `--name` paramter is used for the friendly name of the sensor in Home Assistant and for the MQTT topic names. It is the only required parameter.
+ - The `--name` paramter is used for the friendly name of the sensor in Home Assistant and for the MQTT topic names. It is the only required parameter. Here, I'm using "NUC" since my primary server is an Intel NUC.
  - The `--cpu=60` parameter is the collection interval for the CPU metrics. Here we're overserving CPU metrics for 60 seconds and then reporting the average value to MQTT. A good value for this parameter is anywhere between 60 and 1800 seconds (1 to 15 minutes).
  - The `--vm` flag indicates that virtual memory (RAM) metrics should also be published.
  - `-vvvvv` (five v's) specifies debug-level logging to the console. Reduce the quantity of v's to reduce the logging verbosity.
