@@ -48,9 +48,12 @@ class PSUtilMetric(object):
             'state_topic': t['state']}
         return config_topic
 
-class CPUMetric(PSUtilMetric):
+    def get_state(self):
+        raise NotImplementedError
+
+class CPUMetrics(PSUtilMetric):
     def __init__(self, interval):
-        super(CPUMetric, self).__init__()
+        super(CPUMetrics, self).__init__()
         self.name = "CPU"
         self.icon = "mdi:chip"
         self.interval = interval
@@ -62,9 +65,9 @@ class CPUMetric(PSUtilMetric):
         r['attrs'] = jsons.dump(cpu_times)
         return r
 
-class VirtualMemoryMetric(PSUtilMetric):
+class VirtualMemoryMetrics(PSUtilMetric):
     def __init__(self, *args, **kwargs):
-        super(VirtualMemoryMetric, self).__init__(*args, **kwargs)
+        super(VirtualMemoryMetrics, self).__init__(*args, **kwargs)
         self.name = "Virtual Memory"
         self.icon = "mdi:memory"
 
@@ -74,6 +77,43 @@ class VirtualMemoryMetric(PSUtilMetric):
         r['state'] = "{:.1f}".format(vm.percent)
         r['attrs'] = jsons.dump(vm)
         return r
+
+
+class DiskUsageMetrics(PSUtilMetric):
+    def __init__(self, mountpoint):
+        super(DiskUsageMetrics, self).__init__()
+        self.name = "Disk Usage"
+        self.icon = "mdi:harddisk"
+        self.mountpoint = mountpoint
+
+    def get_state(self):
+        r = {}
+        disk = psutil.disk_usage(self.mountpoint)
+        r['state'] = "{:.1f}".format(disk.percent)
+        r['attrs'] = jsons.dump(disk)
+        return r
+
+    def get_config_topic(self, topic_prefix, system_name):
+        def sanitize(val):
+            return val.lower().replace(" ", "_").replace("/","_")
+        sn = sanitize(system_name)
+        n = sanitize(self.mountpoint)
+        t = {}
+        t['state'] = "{}/sensor/{}/disk_usage/{}/state".format(topic_prefix, sn, n)
+        t['config'] = "{}/sensor/{}/disk_usage/{}/config".format(topic_prefix, sn, n)
+        t['avail'] = "{}/sensor/{}/disk_usage/{}/availability".format(topic_prefix, sn, n)
+        t['attrs'] = "{}/sensor/{}/disk_usage/{}/attributes".format(topic_prefix, sn, n)
+        self.topics = t
+        
+        config_topic = {'name': system_name + ' ' + self.mountpoint,
+            'unique_id': sn + '_' + n,
+            'qos': 1,
+            'icon': self.icon,
+            'unit_of_measurement': self.unit_of_measurement,
+            'availability_topic': t['avail'],
+            'json_attributes_topic': t['attrs'],
+            'state_topic': t['state']}
+        return config_topic
 
 class PSUtilDaemon(object):
     def __init__(self, system_name, broker_host, topic_prefix):
@@ -152,12 +192,16 @@ if __name__ == "__main__":
                     help='Hostname or IP address of the MQTT broker (default: localhost)')
     parser.add_argument('--prefix', default="homeassistant",
                     help='MQTT topic prefix (default: homeassistant)')
-    parser.add_argument("-v", "--verbosity", action="count", default=1,
-                    help='Log verbosity (default: 1 (critical errors))')
+    parser.add_argument("-v", "--verbosity", action="count", default=0,
+                    help='Log verbosity (default: 0 (log output disabled)')
 
     parser.add_argument("--cpu", help="Publish CPU metrics", type=int, 
                         nargs="?", const=60, default=None, metavar='INTERVAL')
     parser.add_argument("--vm", help="Publish virtual memory", action="store_true")
+    parser.add_argument("--du", help="Publish disk usage metrics", type=str, action="append", 
+                        nargs="?", const='/', default=None, metavar='MOUNT')
+
+
     args = parser.parse_args()
     system_name = args.name
     broker_host = args.broker
@@ -180,12 +224,18 @@ if __name__ == "__main__":
 
     stats = PSUtilDaemon(system_name, broker_host, topic_prefix)
     if args.cpu:
-        cpu = CPUMetric(interval=args.cpu)
+        cpu = CPUMetrics(interval=args.cpu)
         stats.add_metric(cpu)
     if args.vm:
-        vm = VirtualMemoryMetric()
+        vm = VirtualMemoryMetrics()
         stats.add_metric(vm)
-    if not args.vm or args.cpu:
+
+    if args.du:
+        for mountpoint in args.du:
+            du = DiskUsageMetrics(mountpoint=mountpoint)
+            stats.add_metric(du)
+
+    if not (args.vm or args.cpu or args.du):
         logger.warning("No metrics specified. Nothing will be published.")
     stats.connect()
 
