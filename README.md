@@ -5,7 +5,7 @@ Publish hardware monitoring data from psutil to a MQTT broker
 
 This project is intended to be an alternative to the (very good) [Glances](https://github.com/nicolargo/glances) project. The primary design difference is that the Glances integration into Home Assistant relies on periodically polling a RESTful API. However, the pub/sub model of MQTT is a better fit for real-time reporting of this type of data. Additionally, MQTT is already widely used in the HA community. 
 
-## Basic Usage
+## Getting Started
 First the dependencies will need to be installed via `pip`. (psutil-mqtt is a Python3 application so depending on your system, you may have to explicitly call the Python3 version of pip using `pip3` or `pip-3` instead of just the plain `pip`.)
 ```bash
 pip install psutil paho-mqtt  
@@ -28,7 +28,7 @@ This will create the necessary MQTT topics and start sending virtual memory and 
 
 `./psutil-mqtt.py --name Server1 -vvvvv --cpu=60 --vm --du='/var/spool' --du='/'`
 
-## Usage with Home Assistant (HA)
+## Using with Home Assistant (HA)
 Once `psutil-mqtt` is collecting data and publishing it to MQTT we can do something with that data in Home Assistant. 
 
 A few assumptions:
