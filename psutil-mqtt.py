@@ -10,9 +10,7 @@ import psutil
 logger = logging.getLogger('psutil-mqtt')
 logger.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-ch = logging.StreamHandler()
-ch.setLevel(logging.DEBUG)
-logger.addHandler(ch)
+
 '''
 fh = TimedRotatingFileHandler('/var/log/garagedoor/garagedoor1.log',
     interval=1, when="w6", backupCount=5)
@@ -59,7 +57,7 @@ class CPUMetric(PSUtilMetric):
 
     def get_state(self):
         r = {}
-        cpu_times = psutil.cpu_times_percent(interval=5, percpu=False)
+        cpu_times = psutil.cpu_times_percent(interval=self.interval, percpu=False)
         r['state'] = "{:.1f}".format(100.0 - cpu_times.idle)
         r['attrs'] = jsons.dump(cpu_times)
         return r
@@ -98,10 +96,10 @@ class PSUtilDaemon(object):
               logger.error(str(e))
               raise
 
-    def _report_status(self, status, avail_topic):
+    def _report_status(self, avail_topic, status):
         if status: status = 'online'
         else: status = 'offline'
-        logger.debug('Publishing "{}" to {}'.format(status, avail_topic))
+        logger.info(self._pub_log(avail_topic, status))
         self.client.publish(avail_topic, status, retain=True, qos=1)
 
     def sig_handle(self, signum, frame):
@@ -110,16 +108,20 @@ class PSUtilDaemon(object):
     def _cleanup(self, exit_code=0):
         logger.warning("Shutting down gracefully.")
         for metric in self.metrics:
-            self._report_status(False, metric.topics['avail'])
+            self._report_status(metric.topics['avail'], False)
         self.client.loop_stop() 
         self.client.disconnect()
         sys.exit(exit_code)
 
+    def _pub_log(self, topic, msg):
+        return "Publishing '{}' to topic '{}'.".format(msg, topic)
+
     def create_config_topics(self):
         for metric in self.metrics:
             config_topic = metric.get_config_topic(self.topic_prefix, self.system_name)
-            print(json.dumps(config_topic))
+            logger.debug(self._pub_log(metric.topics['config'], config_topic))
             self.client.publish(metric.topics['config'], json.dumps(config_topic), retain=True, qos=1)
+            self._report_status(metric.topics['avail'], True)
 
     def clean(self):
         raise NotImplementedError("Clean function doesn't work yet.")
@@ -129,35 +131,62 @@ class PSUtilDaemon(object):
 
     def monitor(self):
         self.create_config_topics()
-        for metric in self.metrics:
-            self._report_status(True, metric.topics['avail'])
-
         while True:
             for metric in self.metrics:
                 s = metric.get_state()
                 state = s['state']
                 attrs = json.dumps(s['attrs'])
-                logger.debug("Publishing '{}' to topic '{}'.".format(state, metric.topics['state']))
+                logger.debug(self._pub_log(metric.topics['state'], state))
                 self.client.publish(metric.topics['state'], state, retain=False, qos=1)
-                logger.debug("Publishing '{}' to topic '{}'.".format(attrs, metric.topics['attrs']))
+                logger.debug(self._pub_log(metric.topics['attrs'], attrs))
                 self.client.publish(metric.topics['attrs'], attrs, retain=False, qos=1)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--clean", help="Clean up retained MQTT messages and stuff and exit", action="store_true")
     parser.add_argument("--config", help="Create MQTT config topic and exit", action="store_true")
-   
-    args = parser.parse_args()
 
-    system_name = 'NUC'
-    broker_host = "192.168.7.60"
-    topic_prefix = "homeassistant"
+    parser.add_argument('--name', required=True,
+                    help='A descriptive name for the computer being monitored.')
+    parser.add_argument('--broker', default="localhost",
+                    help='Hostname or IP address of the MQTT broker (default: localhost)')
+    parser.add_argument('--prefix', default="homeassistant",
+                    help='MQTT topic prefix (default: homeassistant)')
+    parser.add_argument("-v", "--verbosity", action="count", default=1,
+                    help='Log verbosity (default: 1 (critical errors))')
+
+    parser.add_argument("--cpu", help="Publish CPU metrics", type=int, 
+                        nargs="?", const=60, default=None, metavar='INTERVAL')
+    parser.add_argument("--vm", help="Publish virtual memory", action="store_true")
+    args = parser.parse_args()
+    system_name = args.name
+    broker_host = args.broker
+    topic_prefix = args.prefix
+
+    ch = logging.StreamHandler()
+    if args.verbosity >= 5:
+        ch.setLevel(logging.DEBUG)
+    elif args.verbosity == 4:
+        ch.setLevel(logging.INFO)
+    elif args.verbosity == 3:
+        ch.setLevel(logging.WARNING) 
+    elif args.verbosity == 2:
+        ch.setLevel(logging.ERROR)
+    elif args.verbosity == 1:
+        ch.setLevel(logging.CRITICAL)
+    if args.verbosity > 0:
+        ch.setFormatter(formatter)
+        logger.addHandler(ch)
 
     stats = PSUtilDaemon(system_name, broker_host, topic_prefix)
-    cpu = CPUMetric(interval=60)
-    stats.add_metric(cpu)
-    vm = VirtualMemoryMetric()
-    stats.add_metric(vm)
+    if args.cpu:
+        cpu = CPUMetric(interval=args.cpu)
+        stats.add_metric(cpu)
+    if args.vm:
+        vm = VirtualMemoryMetric()
+        stats.add_metric(vm)
+    if not args.vm or args.cpu:
+        logger.warning("No metrics specified. Nothing will be published.")
     stats.connect()
 
     if args.clean:
