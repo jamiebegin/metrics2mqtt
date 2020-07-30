@@ -27,3 +27,33 @@ Once `psutil-mqtt` is collecting data and publishing it to MQTT, we can do somet
 - **The HA MQTT integration is configured to use `homeassistant` as the MQTT autodiscovery prefix.** This is the default for the integration and also the default for `psutil-mqtt`. If you have changed this from the default, use the `--prefix` parameter to specify the correct one.
 - **The MQTT broker is running on the same host you want to collect metrics from.** If not, specify either the hostname or IP address of your MQTT broker by using the `--broker` parameter.
 - **You're not using any authentication or TLS to connect to the broker.** Currently `psutil-mqtt` only works with anonymous connections. User name / password authentication is fairly trivial to implement, but TLS encryption is less-so. If this is a feature you need, please post a feature request (or submit a pull request if you're the ambitious type).
+
+### Lovelace Dashboards
+
+I mostly use the excellent [mini-graph-card](https://github.com/kalkih/mini-graph-card) custom card for my Lovelace dashboards. It's highly-customizable and fairly easy to make great looking charts in HA. Here is a very basic config example of using the metrics produced by `psutil-mqtt` to display the past 12 hours of CPU and memory utilization on my Intel NUC server:
+
+```yaml
+entities:
+  - entity: sensor.nuc_cpu
+    name: CPU Utilization
+    show_legend: true
+    show_line: true
+    show_points: false
+  - entity: sensor.nuc_virtual_memory
+    name: Memory Utilization
+    show_legend: true
+    show_line: true
+    show_points: false
+hours_to_show: 12
+line_width: 2
+lower_bound: 0
+name: NUC System Metrics
+points_per_hour: 6
+show:
+  labels: false
+  labels_secondary: false
+type: 'custom:mini-graph-card'
+upper_bound: 100
+
+```
+![Example card in Home Assistant](https://github.com/jamiebegin/psutil-mqtt/blob/master/docs/example_card.png?raw=true)
