@@ -78,7 +78,6 @@ class VirtualMemoryMetrics(PSUtilMetric):
         r['attrs'] = jsons.dump(vm)
         return r
 
-
 class DiskUsageMetrics(PSUtilMetric):
     def __init__(self, mountpoint):
         super(DiskUsageMetrics, self).__init__()
@@ -99,14 +98,15 @@ class DiskUsageMetrics(PSUtilMetric):
         sn = sanitize(system_name)
         n = sanitize(self.mountpoint)
         t = {}
-        t['state'] = "{}/sensor/{}/disk-usage{}/state".format(topic_prefix, sn, n)
-        t['config'] = "{}/sensor/{}/disk-usage{}/config".format(topic_prefix, sn, n)
-        t['avail'] = "{}/sensor/{}/disk-usage{}/availability".format(topic_prefix, sn, n)
-        t['attrs'] = "{}/sensor/{}/disk-usage{}/attributes".format(topic_prefix, sn, n)
+        t['state'] = "{}/sensor/{}/disk_usage_{}/state".format(topic_prefix, sn, n)
+        t['config'] = "{}/sensor/{}/disk_usage_{}/config".format(topic_prefix, sn, n)
+        t['avail'] = "{}/sensor/{}/disk_usage_{}/availability".format(topic_prefix, sn, n)
+        t['attrs'] = "{}/sensor/{}/disk_usage_{}/attributes".format(topic_prefix, sn, n)
         self.topics = t
         
-        config_topic = {'name': system_name + ' Disk Usage (' + self.mountpoint + ')',
-            'unique_id': sn + '_' + n,
+        config_topic = {
+            'name': system_name + ' Disk Usage (' + self.mountpoint + ' Volume)',
+            'unique_id': sn + '_disk_usage_' + n,
             'qos': 1,
             'icon': self.icon,
             'unit_of_measurement': self.unit_of_measurement,
