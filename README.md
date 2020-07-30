@@ -22,8 +22,8 @@ This will create the necessary MQTT topics and start sending virtual memory and 
  - `-vvvvv` (five v's) specifies debug-level logging to the console. Reduce the quantity of v's to reduce the logging verbosity.
  
 ## Usage with Home Assistant (HA)
-Once `psutil-mqtt` is collecting data and publishing it to MQTT, we can do something with that data in Home Assistant. First a few assumptions:
-- **Home Assistant is already configured to use a MQTT broker.** Either the (recently deprecated internal broker, or preferably an external broker like [Mosquitto](https://mosquitto.org/). I run both HA and Mosquitto in separate Docker containers on the same host and the config works well.
+Once `psutil-mqtt` is collecting data and publishing it to MQTT we can do something with that data in Home Assistant. First a few assumptions:
+- **Home Assistant is already configured to use a MQTT broker.** Setting up MQTT and HA is beyond the scope of this documentation. However, there are a lot of great tutorials on YouTube. Either the (recently deprecated internal broker, or preferably an external broker like [Mosquitto](https://mosquitto.org/)) will need to be installed and the HA MQTT intergration configured. I run both HA and Mosquitto in separate Docker containers on the same host and the config works well.
 - **The HA MQTT integration is configured to use `homeassistant` as the MQTT autodiscovery prefix.** This is the default for the integration and also the default for `psutil-mqtt`. If you have changed this from the default, use the `--prefix` parameter to specify the correct one.
 - **The MQTT broker is running on the same host you want to collect metrics from.** If not, specify either the hostname or IP address of your MQTT broker by using the `--broker` parameter.
 - **You're not using any authentication or TLS to connect to the broker.** Currently `psutil-mqtt` only works with anonymous connections. User name / password authentication is fairly trivial to implement, but TLS encryption is less-so. If this is a feature you need, please post a feature request (or submit a pull request if you're the ambitious type).
