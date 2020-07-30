@@ -51,10 +51,11 @@ class PSUtilMetric(object):
         return config_topic
 
 class CPUMetric(PSUtilMetric):
-    def __init__(self, *args, **kwargs):
-        super(CPUMetric, self).__init__(*args, **kwargs)
+    def __init__(self, interval):
+        super(CPUMetric, self).__init__()
         self.name = "CPU"
         self.icon = "mdi:chip"
+        self.interval = interval
 
     def get_state(self):
         r = {}
@@ -153,7 +154,7 @@ if __name__ == "__main__":
     topic_prefix = "homeassistant"
 
     stats = PSUtilDaemon(system_name, broker_host, topic_prefix)
-    cpu = CPUMetric()
+    cpu = CPUMetric(interval=60)
     stats.add_metric(cpu)
     vm = VirtualMemoryMetric()
     stats.add_metric(vm)
