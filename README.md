@@ -16,11 +16,18 @@ Start sending metrics!
 ```
 
 This will create the necessary MQTT topics and start sending virtual memory and CPU utilization metrics. 
- - The `--name` paramter is used for the friendly name of the sensor in Home Assistant and for the MQTT topic names. It is the only required parameter. Here, I'm using "NUC" since my primary server is an Intel NUC.
- - The `--cpu=60` parameter is the collection interval for the CPU metrics. Here CPU metrics are gathered for 60 seconds and then the average value is published to MQTT state topic for the sensor. A good value for this parameter is anywhere between 60 and 1800 seconds (1 to 15 minutes).
+ - The `--name` parameter is used for the friendly name of the sensor in Home Assistant and for the MQTT topic names. It is the only required parameter. Here, I'm using "NUC" since my primary server is an Intel NUC.
+ - The `--cpu=60` parameter is the collection interval for the CPU metrics. Here CPU metrics are gathered for 60 seconds and then the average value is published to MQTT state topic for the sensor. A good value for this option is anywhere between 60 and 1800 seconds (1 to 15 minutes).
  - The `--vm` flag indicates that virtual memory (RAM) metrics should also be published.
  - `-vvvvv` (five v's) specifies debug-level logging to the console. Reduce the quantity of v's to reduce the logging verbosity.
  
+## Disk Usage
+`psutil-mqtt` can publish disk usage metrics using the `du` option. Multiple `du` options can be specified to monitor different volumes. Each volume will present as a separate sensor in Home Assistant. The sensor state reports the percentage of total volume space consumed. Additional data (total volume size in bytes, free bytes, and used bytes) are accessable as state attributes on each sensor.
+
+#### Example
+
+`./psutil-mqtt.py --name Server1 -vvvvv --cpu=60 --vm --du='/var/spool' --du='/'`
+
 ## Usage with Home Assistant (HA)
 Once `psutil-mqtt` is collecting data and publishing it to MQTT we can do something with that data in Home Assistant. 
 
