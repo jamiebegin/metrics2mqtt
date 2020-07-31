@@ -29,7 +29,7 @@ This will create the necessary MQTT topics and start sending virtual memory and 
 `./psutil-mqtt.py --name Server1 -vvvvv --cpu=60 --vm --du='/var/spool' --du='/'`
 
 ## Using with Home Assistant (HA)
-Once `psutil-mqtt` is collecting data and publishing it to MQTT we can do something with that data in Home Assistant. 
+Once `psutil-mqtt` is collecting data and publishing it to MQTT, it's rather trival to use the metrics in Home Assistant.
 
 A few assumptions:
 - **Home Assistant is already configured to use a MQTT broker.** Setting up MQTT and HA is beyond the scope of this documentation. However, there are a lot of great tutorials on YouTube. Either the (recently deprecated internal broker, or preferably an external broker like [Mosquitto](https://mosquitto.org/)) will need to be installed and the HA MQTT intergration configured. I run both HA and Mosquitto in separate Docker containers on the same host and the config works well.
