@@ -222,6 +222,9 @@ if __name__ == "__main__":
         ch.setFormatter(formatter)
         logger.addHandler(ch)
 
+    print(psutil.sensors_temperatures())
+    sys.exit(0)
+
     stats = PSUtilDaemon(system_name, broker_host, topic_prefix)
     if args.cpu:
         cpu = CPUMetrics(interval=args.cpu)
