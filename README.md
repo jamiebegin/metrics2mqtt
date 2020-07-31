@@ -32,7 +32,7 @@ This will create the necessary MQTT topics and start sending virtual memory and 
 Once `psutil-mqtt` is collecting data and publishing it to MQTT, it's rather trival to use the metrics in Home Assistant.
 
 A few assumptions:
-- **Home Assistant is already configured to use a MQTT broker.** Setting up MQTT and HA is beyond the scope of this documentation. However, there are a lot of great tutorials on YouTube. Either the (recently deprecated internal broker, or preferably an external broker like [Mosquitto](https://mosquitto.org/)) will need to be installed and the HA MQTT intergration configured. I run both HA and Mosquitto in separate Docker containers on the same host and the config works well.
+- **Home Assistant is already configured to use a MQTT broker.** Setting up MQTT and HA is beyond the scope of this documentation. However, there are a lot of great tutorials on YouTube. Either the (recently deprecated) internal broker, or preferably an external broker like [Mosquitto](https://mosquitto.org/) will need to be installed and the HA MQTT intergration configured. I run both HA and Mosquitto in separate Docker containers on the same host and the config works well.
 - **The HA MQTT integration is configured to use `homeassistant` as the MQTT autodiscovery prefix.** This is the default for the integration and also the default for `psutil-mqtt`. If you have changed this from the default, use the `--prefix` parameter to specify the correct one.
 - **The MQTT broker is running on the same host you want to collect metrics from.** If not, specify either the hostname or IP address of your MQTT broker by using the `--broker` parameter.
 - **You're not using any authentication or TLS to connect to the broker.** Currently `psutil-mqtt` only works with anonymous connections. User name / password authentication is fairly trivial to implement, but TLS encryption is less-so. If this is a feature you need, please post a feature request (or submit a pull request if you're the ambitious type).
@@ -41,7 +41,7 @@ Using the default prefix and a system name of `NUC` (the name of my server), the
 
 ![Home Assistant Developer Tools screenshot](https://github.com/jamiebegin/psutil-mqtt/blob/master/docs/dev_tools_example.png?raw=true)
 
-The state value is the overall CPU utilization while a detailed breakdown of kernal vs userland time, I/O wait time, etc. appear as attributes. This can be tested in the template sandbox in the Developer Tools:
+The state value is the overall CPU utilization as a percentage. A detailed breakdown of kernal vs userland time, I/O wait time, etc. appear as attributes. This can be tested in the template sandbox in the Developer Tools:
 ```
 The NUC server recently had a CPU utlization of {{ states('sensor.nuc_cpu') }}%. This included executing user-space programs for {{state_attr('sensor.nuc_cpu', 'user')}}% of cycles.
 ```
