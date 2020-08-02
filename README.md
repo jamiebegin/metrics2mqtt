@@ -26,7 +26,7 @@ This will install the latest release of `metrics2mqtt`, create the necessary MQT
 
 #### Example
 
-`./metrics2mqtt.py --name Server1 -vvvvv --cpu=60 --vm --du='/var/spool' --du='/'`
+`metrics2mqtt --name Server1 -vvvvv --cpu=60 --vm --du='/var/spool' --du='/'`
 
 ## Compatibility
 `metrics2mqtt` is cross-platform and has been tested to work on CentOS, Ubuntu, Windows 10, and Raspbian (Raspberry Pi). **Python 3.6 (or above) is recommended.**
