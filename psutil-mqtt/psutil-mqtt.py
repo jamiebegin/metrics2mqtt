@@ -87,8 +87,7 @@ class MQTTMetrics(object):
                 self.client.publish(metric.topics['state'], state, retain=False, qos=1)
                 logger.debug(self._pub_log(metric.topics['attrs'], attrs))
                 self.client.publish(metric.topics['attrs'], attrs, retain=False, qos=1)
-
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--clean", help="Clean up retained MQTT messages and stuff and exit", action="store_true")
     parser.add_argument("--config", help="Create MQTT config topic and exit", action="store_true")
@@ -152,3 +151,6 @@ if __name__ == "__main__":
         stats.create_config_topic(exit=True)
     else:
         stats.monitor()
+
+if __name__ == "__main__":
+    main()
