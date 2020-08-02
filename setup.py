@@ -3,7 +3,7 @@ from distutils.core import setup
 setup(
   name = 'metrics2mqtt',
   packages = ['metrics2mqtt'], 
-  version = '0.1.7',
+  version = '0.1.8',
   license='MIT', 
   description = 'Publish hardware monitoring data from psutil to a MQTT broker.',  
   author = 'Jamie Begin',
