@@ -9,7 +9,7 @@ setup(
   author = 'Jamie Begin',
   author_email = 'jjbegin@gmail.com',
   url = 'https://github.com/jamiebegin/psutil-mqtt', 
-  download_url = 'https://github.com/jamiebegin/psutil-mqtt/archive/v0.1.tar.gz', 
+  download_url = 'https://github.com/jamiebegin/psutil-mqtt/archive/v0.1.1.tar.gz', 
   keywords = ['mqtt', 'psutil', 'metrics'], 
   install_requires=[ 
           'jsons',
