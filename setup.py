@@ -16,7 +16,7 @@ setup(
     ],
   entry_points = {
         'console_scripts': [
-            'psutil-mqtt=psutil-mqtt:main'
+            'psutil-mqtt = psutil-mqtt.psutil-mqtt:main'
         ]
   },    
   install_requires=[ 
