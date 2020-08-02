@@ -3,7 +3,7 @@ from distutils.core import setup
 setup(
   name = 'psutil-mqtt',
   packages = ['psutil-mqtt'], 
-  version = '0.1',
+  version = '0.1.1',
   license='MIT', 
   description = 'Publish hardware monitoring data from psutil to a MQTT broker.',  
   author = 'Jamie Begin',
