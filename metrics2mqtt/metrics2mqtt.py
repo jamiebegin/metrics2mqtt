@@ -7,7 +7,7 @@ import json, jsons
 import paho.mqtt.client as mqtt
 import psutil
 
-from metrics import CPUMetrics, VirtualMemoryMetrics, DiskUsageMetrics
+from metrics2mqtt.metrics import CPUMetrics, VirtualMemoryMetrics, DiskUsageMetrics
 
 logger = logging.getLogger('metrics2mqtt')
 logger.setLevel(logging.DEBUG)
