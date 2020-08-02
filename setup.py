@@ -12,7 +12,7 @@ setup(
   download_url = 'https://github.com/jamiebegin/psutil-mqtt/archive/v0.1.2.tar.gz', 
   keywords = ['mqtt', 'psutil', 'metrics'], 
   setup_requires = [
-    wheel
+    'wheel'
     ],
   entry_points = {
         'console_scripts': [
