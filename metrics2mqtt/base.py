@@ -16,10 +16,12 @@ logger.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 class MQTTMetrics(object):
-    def __init__(self, system_name, interval, broker_host, topic_prefix):
+    def __init__(self, system_name, interval, broker_host, username, password, topic_prefix):
         self.system_name = system_name
         self.interval = interval
         self.broker_host = broker_host
+        self.username = username
+        self.password = password
         self.topic_prefix = topic_prefix
         self.metrics = []
         
@@ -30,13 +32,15 @@ class MQTTMetrics(object):
     def connect(self):
         self.client = mqtt.Client(self.system_name + '_psutilmqtt')
         try: 
-              self.client.connect(self.broker_host)
-              logger.info("Connected to MQTT broker.")
-              self.client.loop_start()
+            if self.username or self.password:
+                self.client.username_pw_set(self.username, self.password)
+            self.client.connect(self.broker_host)
+            logger.info("Connected to MQTT broker.")
+            self.client.loop_start()
         except Exception as e:
-              logger.error("Error while trying to connect to MQTT broker.")
-              logger.error(str(e))
-              raise
+            logger.error("Error while trying to connect to MQTT broker.")
+            logger.error(str(e))
+            raise
 
     def _report_status(self, avail_topic, status):
         if status: status = 'online'
@@ -106,13 +110,16 @@ def main():
                     help='A descriptive name for the computer being monitored.')
     parser.add_argument('--broker', default="localhost",
                     help='Hostname or IP address of the MQTT broker (default: localhost)')
+    parser.add_argument('--username', default=None,
+                    help='Username for MQTT broker authentication (default: None)')
+    parser.add_argument('--password', default=None,
+                    help='Password for MQTT broker authentication (default: None)')                     
     parser.add_argument('--interval', default=300, type=int,
                     help='Publish metrics to MQTT broker every n seconds (default: 300)')
     parser.add_argument('--prefix', default="homeassistant",
                     help='MQTT topic prefix (default: homeassistant)')
     parser.add_argument("-v", "--verbosity", action="count", default=0,
                     help='Log verbosity (default: 0 (log output disabled)')
-
     parser.add_argument("--cpu", help="Publish CPU metrics", type=int, 
                         nargs="?", const=60, default=None, metavar='INTERVAL')
     parser.add_argument("--vm", help="Publish virtual memory", action="store_true")
@@ -125,6 +132,8 @@ def main():
     broker_host = args.broker
     topic_prefix = args.prefix
     interval = args.interval
+    username = args.username
+    password = args.password
 
     ch = logging.StreamHandler()
     if args.verbosity >= 5:
@@ -141,7 +150,7 @@ def main():
         ch.setFormatter(formatter)
         logger.addHandler(ch)
 
-    stats = MQTTMetrics(system_name, interval, broker_host, topic_prefix)
+    stats = MQTTMetrics(system_name, interval, broker_host, username, password, topic_prefix)
     if args.cpu:
         cpu = CPUMetrics(interval=args.cpu)
         stats.add_metric(cpu)
