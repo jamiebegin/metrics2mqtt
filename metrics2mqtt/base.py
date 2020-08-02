@@ -9,20 +9,11 @@ import json, jsons
 import paho.mqtt.client as mqtt
 import psutil
 
-from metrics import CPUMetrics, VirtualMemoryMetrics, DiskUsageMetrics
+from metrics2mqtt.metrics import CPUMetrics, VirtualMemoryMetrics, DiskUsageMetrics
 
 logger = logging.getLogger('metrics2mqtt')
 logger.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-
-'''
-fh = TimedRotatingFileHandler('/var/log/garagedoor/garagedoor1.log',
-    interval=1, when="w6", backupCount=5)
-fh.setLevel(logging.DEBUG)
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-fh.setFormatter(formatter)
-logger.addHandler(fh)
-'''
 
 class MQTTMetrics(object):
     def __init__(self, system_name, interval, broker_host, topic_prefix):
