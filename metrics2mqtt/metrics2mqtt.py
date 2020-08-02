@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 import sys
+import time
 import signal
+import queue
 import argparse
 import logging
 import json, jsons
 import paho.mqtt.client as mqtt
 import psutil
 
-from metrics2mqtt.metrics import CPUMetrics, VirtualMemoryMetrics, DiskUsageMetrics
+from metrics import CPUMetrics, VirtualMemoryMetrics, DiskUsageMetrics
 
 logger = logging.getLogger('metrics2mqtt')
 logger.setLevel(logging.DEBUG)
@@ -23,14 +25,16 @@ logger.addHandler(fh)
 '''
 
 class MQTTMetrics(object):
-    def __init__(self, system_name, broker_host, topic_prefix):
+    def __init__(self, system_name, interval, broker_host, topic_prefix):
         self.system_name = system_name
+        self.interval = interval
         self.broker_host = broker_host
         self.topic_prefix = topic_prefix
         self.metrics = []
         
         signal.signal(signal.SIGTERM, self.sig_handle)
         signal.signal(signal.SIGINT, self.sig_handle)
+        self.cpu_metrics_queue = queue.Queue()
 
     def connect(self):
         self.client = mqtt.Client(self.system_name + '_psutilmqtt')
@@ -76,17 +80,27 @@ class MQTTMetrics(object):
     def add_metric(self, metric):
         self.metrics.append(metric)
 
+    def _check_queue(self):
+        queued_metric = None
+        while not self.cpu_metrics_queue.empty():
+            queued_metric = self.cpu_metrics_queue.get()
+
+    def _publish_metric(self, metric):
+        state = metric.polled_result['state']
+        attrs = json.dumps(metric.polled_result['attrs'])
+        logger.debug(self._pub_log(metric.topics['state'], state))
+        self.client.publish(metric.topics['state'], state, retain=False, qos=1)
+        logger.debug(self._pub_log(metric.topics['attrs'], attrs))
+        self.client.publish(metric.topics['attrs'], attrs, retain=False, qos=1)
+
     def monitor(self):
         self.create_config_topics()
         while True:
+            self._check_queue()
             for metric in self.metrics:
-                s = metric.get_state()
-                state = s['state']
-                attrs = json.dumps(s['attrs'])
-                logger.debug(self._pub_log(metric.topics['state'], state))
-                self.client.publish(metric.topics['state'], state, retain=False, qos=1)
-                logger.debug(self._pub_log(metric.topics['attrs'], attrs))
-                self.client.publish(metric.topics['attrs'], attrs, retain=False, qos=1)
+                metric.poll()
+                self._publish_metric(metric)
+            time.sleep(self.interval)
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--clean", help="Clean up retained MQTT messages and stuff and exit", action="store_true")
@@ -96,6 +110,8 @@ def main():
                     help='A descriptive name for the computer being monitored.')
     parser.add_argument('--broker', default="localhost",
                     help='Hostname or IP address of the MQTT broker (default: localhost)')
+    parser.add_argument('--interval', default=60, type=int,
+                    help='Publish metrics to MQTT broker every n seconds (default: 60)')
     parser.add_argument('--prefix', default="homeassistant",
                     help='MQTT topic prefix (default: homeassistant)')
     parser.add_argument("-v", "--verbosity", action="count", default=0,
@@ -112,6 +128,7 @@ def main():
     system_name = args.name
     broker_host = args.broker
     topic_prefix = args.prefix
+    interval = args.interval
 
     ch = logging.StreamHandler()
     if args.verbosity >= 5:
@@ -128,7 +145,7 @@ def main():
         ch.setFormatter(formatter)
         logger.addHandler(ch)
 
-    stats = MQTTMetrics(system_name, broker_host, topic_prefix)
+    stats = MQTTMetrics(system_name, interval, broker_host, topic_prefix)
     if args.cpu:
         cpu = CPUMetrics(interval=args.cpu)
         stats.add_metric(cpu)
