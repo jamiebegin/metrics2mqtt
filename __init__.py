@@ -1,2 +1,2 @@
-from psutil-mqtt import CPUMetrics, VirtualMemoryMetrics, DiskUsageMetrics, PSUtilMQTT
-
+from metrics2mqtt import MQTTMetrics
+from metrics import CPUMetrics, VirtualMemoryMetrics, DiskUsageMetrics

@@ -9,7 +9,7 @@ import psutil
 
 from metrics import CPUMetrics, VirtualMemoryMetrics, DiskUsageMetrics
 
-logger = logging.getLogger('psutil-mqtt')
+logger = logging.getLogger('metrics2mqtt')
 logger.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
