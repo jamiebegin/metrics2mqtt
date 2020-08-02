@@ -10,10 +10,8 @@ class BaseMetric(object):
         self.polled_result = None
 
     def get_config_topic(self, topic_prefix, system_name):
-        def sanitize(val):
-            return val.lower().replace(" ", "_")
-        sn = sanitize(system_name)
-        n = sanitize(self.name)
+        sn = self.sanitize(system_name)
+        n = self.sanitize(self.name)
         t = {}
         t['state'] = "{}/sensor/{}/{}/state".format(topic_prefix, sn, n)
         t['config'] = "{}/sensor/{}/{}/config".format(topic_prefix, sn, n)
@@ -30,6 +28,9 @@ class BaseMetric(object):
             'json_attributes_topic': t['attrs'],
             'state_topic': t['state']}
         return config_topic
+
+    def sanitize(self, val):
+        return val.lower().replace(" ", "_").replace("/","_")
 
     def poll(self, result_queue=None):
         raise NotImplementedError
@@ -93,10 +94,8 @@ class DiskUsageMetrics(BaseMetric):
         return False
 
     def get_config_topic(self, topic_prefix, system_name):
-        def sanitize(val):
-            return val.lower().replace(" ", "_").replace("/","_")
-        sn = sanitize(system_name)
-        n = sanitize(self.mountpoint)
+        sn = self.sanitize(system_name)
+        n = self.sanitize(self.mountpoint)
         t = {}
         t['state'] = "{}/sensor/{}/disk_usage_{}/state".format(topic_prefix, sn, n)
         t['config'] = "{}/sensor/{}/disk_usage_{}/config".format(topic_prefix, sn, n)
