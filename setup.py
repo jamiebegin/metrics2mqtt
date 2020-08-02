@@ -14,11 +14,17 @@ setup(
   setup_requires = [
     wheel
     ],
+  entry_points = {
+        'console_scripts': [
+            'psutil-mqtt = psutil-mqtt:main'
+        ]
+  },    
   install_requires=[ 
           'jsons',
           'psutil',
           'paho-mqtt',
       ],
+  zip_safe = False,
   classifiers=[
     'Development Status :: 3 - Alpha',
     'Intended Audience :: Information Technology', 
