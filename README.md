@@ -17,8 +17,8 @@ This will install the latest release of `metrics2mqtt`, create the necessary MQT
  - The `--cpu=60` parameter is the collection interval for the CPU metrics. Here CPU metrics are gathered for 60 seconds and then the average value is published to MQTT state topic for the sensor. A good value for this option is anywhere between 60 and 1800 seconds (1 to 15 minutes).
  - The `--vm` flag indicates that virtual memory (RAM) metrics should also be published.
  - `-vvvvv` (five v's) specifies debug-level logging to the console. Reduce the quantity of v's to reduce the logging verbosity.
- 
-## Disk Usage
+ ## Additional Metrics 
+### Disk Usage
 `metrics2mqtt` can publish disk usage metrics using the `du` option. Multiple `du` options can be specified to monitor different volumes. Each volume will present as a separate sensor in Home Assistant. The sensor state reports the percentage of total volume space consumed. Additional data (total volume size in bytes, free bytes, and used bytes) are accessable as state attributes on each sensor.
 
 #### Example
