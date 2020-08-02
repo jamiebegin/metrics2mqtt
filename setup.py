@@ -3,13 +3,13 @@ from distutils.core import setup
 setup(
   name = 'psutil-mqtt',
   packages = ['psutil-mqtt'], 
-  version = '0.1.3',
+  version = '0.1.4',
   license='MIT', 
   description = 'Publish hardware monitoring data from psutil to a MQTT broker.',  
   author = 'Jamie Begin',
   author_email = 'jjbegin@gmail.com',
   url = 'https://github.com/jamiebegin/psutil-mqtt', 
-  download_url = 'https://github.com/jamiebegin/psutil-mqtt/archive/v0.1.3.tar.gz', 
+  download_url = 'https://github.com/jamiebegin/psutil-mqtt/archive/v0.1.4.tar.gz', 
   keywords = ['mqtt', 'psutil', 'metrics'], 
   setup_requires = [
     'wheel'
