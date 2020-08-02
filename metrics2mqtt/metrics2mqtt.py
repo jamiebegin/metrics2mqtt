@@ -108,15 +108,15 @@ class MQTTMetrics(object):
                     self._publish_metric(metric)
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--clean", help="Clean up retained MQTT messages and stuff and exit", action="store_true")
+    parser.add_argument("--clean", help="Clean up retained MQTT messages and stuff and exit (NOT IMPLEMENTED YET)", action="store_true")
     parser.add_argument("--config", help="Create MQTT config topic and exit", action="store_true")
 
     parser.add_argument('--name', required=True,
                     help='A descriptive name for the computer being monitored.')
     parser.add_argument('--broker', default="localhost",
                     help='Hostname or IP address of the MQTT broker (default: localhost)')
-    parser.add_argument('--interval', default=60, type=int,
-                    help='Publish metrics to MQTT broker every n seconds (default: 60)')
+    parser.add_argument('--interval', default=300, type=int,
+                    help='Publish metrics to MQTT broker every n seconds (default: 300)')
     parser.add_argument('--prefix', default="homeassistant",
                     help='MQTT topic prefix (default: homeassistant)')
     parser.add_argument("-v", "--verbosity", action="count", default=0,
