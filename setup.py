@@ -16,7 +16,7 @@ setup(
     ],
   entry_points = {
         'console_scripts': [
-            'metrics2mqtt = metrics2mqtt:main'
+            'metrics2mqtt = metrics2mqtt.metrics2mqtt:main'
         ]
   },    
   install_requires=[ 
