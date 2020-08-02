@@ -1,22 +1,22 @@
 from distutils.core import setup
 
 setup(
-  name = 'psutil-mqtt',
-  packages = ['psutil-mqtt'], 
-  version = '0.1.5',
+  name = 'metrics2mqtt',
+  packages = ['metrics2mqtt'], 
+  version = '0.1.6',
   license='MIT', 
   description = 'Publish hardware monitoring data from psutil to a MQTT broker.',  
   author = 'Jamie Begin',
   author_email = 'jjbegin@gmail.com',
-  url = 'https://github.com/jamiebegin/psutil-mqtt', 
-  download_url = 'https://github.com/jamiebegin/psutil-mqtt/archive/v0.1.5.tar.gz', 
+  url = 'https://github.com/jamiebegin/metrics2mqtt', 
+  download_url = 'https://github.com/jamiebegin/metrics2mqtt/archive/v0.1.6.tar.gz', 
   keywords = ['mqtt', 'psutil', 'metrics'], 
   setup_requires = [
     'wheel'
     ],
   entry_points = {
         'console_scripts': [
-            'psutil-mqtt = psutil-mqtt:main'
+            'metrics2mqtt = metrics2mqtt:main'
         ]
   },    
   install_requires=[ 
