@@ -49,7 +49,7 @@ Which displays something similar to: `The NUC server recently had a CPU utlizati
 
 ### Lovelace Dashboards
 
-I mostly use the excellent [mini-graph-card](https://github.com/kalkih/mini-graph-card) custom card for my Lovelace dashboards. It's highly-customizable and fairly easy to make great looking charts in HA. Here is a very basic config example of using the metrics produced by `psutil-mqtt` to display the past 12 hours of CPU and memory utilization on my Intel NUC server:
+I mostly use the excellent [mini-graph-card](https://github.com/kalkih/mini-graph-card) custom card for my Lovelace dashboards. It's highly-customizable and fairly easy to make great looking charts in HA. Here is a very basic config example of using the metrics produced by `metrics2mqtt` to display the past 12 hours of CPU and memory utilization on my Intel NUC server:
 
 ```yaml
 entities:
