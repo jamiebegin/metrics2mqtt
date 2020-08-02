@@ -2,6 +2,7 @@
 import sys
 import time
 import signal
+import socket
 import queue
 import argparse
 import logging
@@ -105,9 +106,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--clean", help="Clean up retained MQTT messages and stuff and exit (NOT IMPLEMENTED YET)", action="store_true")
     parser.add_argument("--config", help="Create MQTT config topic and exit", action="store_true")
-
-    parser.add_argument('--name', required=True,
-                    help='A descriptive name for the computer being monitored.')
+    parser.add_argument('--name', default=socket.gethostname(),
+                    help='A descriptive name for the computer being monitored (default: hostname)')
     parser.add_argument('--broker', default="localhost",
                     help='Hostname or IP address of the MQTT broker (default: localhost)')
     parser.add_argument('--username', default=None,
