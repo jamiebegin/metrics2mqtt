@@ -81,9 +81,9 @@ class MQTTMetrics(object):
         self.metrics.append(metric)
 
     def _check_queue(self):
-        queued_metric = None
         while not self.cpu_metrics_queue.empty():
             queued_metric = self.cpu_metrics_queue.get()
+            self._publish_metric(queued_metric)
 
     def _publish_metric(self, metric):
         state = metric.polled_result['state']
@@ -96,11 +96,16 @@ class MQTTMetrics(object):
     def monitor(self):
         self.create_config_topics()
         while True:
-            self._check_queue()
+            x = 0
+            while x < self.interval:
+                time.sleep(1)
+                self._check_queue()
+                x += 1
             for metric in self.metrics:
-                metric.poll()
-                self._publish_metric(metric)
-            time.sleep(self.interval)
+                is_deferred = metric.poll(result_queue=self.cpu_metrics_queue)
+                print(metric)
+                if not is_deferred:
+                    self._publish_metric(metric)
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--clean", help="Clean up retained MQTT messages and stuff and exit", action="store_true")
