@@ -11,6 +11,9 @@ setup(
   url = 'https://github.com/jamiebegin/psutil-mqtt', 
   download_url = 'https://github.com/jamiebegin/psutil-mqtt/archive/v0.1.1.tar.gz', 
   keywords = ['mqtt', 'psutil', 'metrics'], 
+  setup_requires = [
+    wheel
+    ],
   install_requires=[ 
           'jsons',
           'psutil',
