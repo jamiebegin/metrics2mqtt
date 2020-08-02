@@ -5,18 +5,14 @@ Publish hardware monitoring data from psutil to a MQTT broker
 
 This project is intended to be a lightweight alternative to the (very good) [Glances](https://github.com/nicolargo/glances) project. The primary design difference is that the Glances integration into Home Assistant relies on periodically polling a RESTful API. However, the pub/sub model of MQTT is a better fit for real-time reporting of this type of data. Additionally, MQTT is already widely used in the home automation community. 
 
-## Getting Started
-First, the dependencies will need to be installed via `pip`. (`metrics2mqtt` is a Python3 application so depending on your system, you may have to explicitly call the Python3 version of pip using `pip3` or `pip-3` instead of just the plain `pip`.)
+## 30-Second Start Guide
+From the computer you're wishing to collect metrics on:
 ```bash
-pip install psutil paho-mqtt  
+pip install metrics2mqtt 
+metrics2mqtt --name MyServerName --cpu=60 --vm -vvvvv
 ```
-Start sending metrics!
-```bash
-./metrics2mqtt.py --name NUC --cpu=60 --vm -vvvvv
-```
-
-This will create the necessary MQTT topics and start sending virtual memory and CPU utilization metrics. 
- - The `--name` parameter is used for the friendly name of the sensor in Home Assistant and for the MQTT topic names. It is the only required parameter. Here, I'm using "NUC" since my primary server is an Intel NUC.
+This will install the latest release of `metrics2mqtt`, create the necessary MQTT topics, and start sending virtual memory and CPU utilization metrics. 
+ - The `--name` parameter is used for the friendly name of the sensor in Home Assistant and for the MQTT topic names. It is the only required parameter.
  - The `--cpu=60` parameter is the collection interval for the CPU metrics. Here CPU metrics are gathered for 60 seconds and then the average value is published to MQTT state topic for the sensor. A good value for this option is anywhere between 60 and 1800 seconds (1 to 15 minutes).
  - The `--vm` flag indicates that virtual memory (RAM) metrics should also be published.
  - `-vvvvv` (five v's) specifies debug-level logging to the console. Reduce the quantity of v's to reduce the logging verbosity.
@@ -27,6 +23,9 @@ This will create the necessary MQTT topics and start sending virtual memory and 
 #### Example
 
 `./metrics2mqtt.py --name Server1 -vvvvv --cpu=60 --vm --du='/var/spool' --du='/'`
+
+## Compatibility
+`metrics2mqtt` is cross-platform and has been tested to work on CentOS, Ubuntu, Windows 10, and Raspbian (Raspberry Pi). **Python 3.6 (or above) is recommended.**
 
 ## Using with Home Assistant (HA)
 Once `metrics2mqtt` is collecting data and publishing it to MQTT, it's rather trival to use the metrics in Home Assistant.
