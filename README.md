@@ -11,7 +11,8 @@ From the computer you're wishing to collect metrics on:
 pip install metrics2mqtt 
 metrics2mqtt --name MyServerName --cpu=60 --vm -vvvvv
 ```
-This will install the latest release of `metrics2mqtt`, create the necessary MQTT topics, and start sending virtual memory and CPU utilization metrics. 
+This will install the latest release of `metrics2mqtt`, create the necessary MQTT topics, and start sending virtual memory and CPU utilization metrics. The MQTT broker is assumed to be running on `localhost`. If not specify the hostname or IP address using the `--broker` parameter.
+
  - The `--name` parameter is used for the friendly name of the sensor in Home Assistant and for the MQTT topic names. It is the only required parameter.
  - The `--cpu=60` parameter is the collection interval for the CPU metrics. Here CPU metrics are gathered for 60 seconds and then the average value is published to MQTT state topic for the sensor. A good value for this option is anywhere between 60 and 1800 seconds (1 to 15 minutes).
  - The `--vm` flag indicates that virtual memory (RAM) metrics should also be published.
