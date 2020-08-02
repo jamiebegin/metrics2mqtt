@@ -1,7 +1,7 @@
 import json, jsons
 import psutil
 
-class PSUtilMetric(object):
+class BaseMetric(object):
     def __init__(self, *args, **kwargs):
         self.icon = "mdi:desktop-tower-monitor"
         self.unit_of_measurement = "%"
@@ -32,7 +32,7 @@ class PSUtilMetric(object):
     def get_state(self):
         raise NotImplementedError
 
-class CPUMetrics(PSUtilMetric):
+class CPUMetrics(BaseMetric):
     def __init__(self, interval):
         super(CPUMetrics, self).__init__()
         self.name = "CPU"
@@ -46,7 +46,7 @@ class CPUMetrics(PSUtilMetric):
         r['attrs'] = jsons.dump(cpu_times)
         return r
 
-class VirtualMemoryMetrics(PSUtilMetric):
+class VirtualMemoryMetrics(BaseMetric):
     def __init__(self, *args, **kwargs):
         super(VirtualMemoryMetrics, self).__init__(*args, **kwargs)
         self.name = "Virtual Memory"
@@ -59,7 +59,7 @@ class VirtualMemoryMetrics(PSUtilMetric):
         r['attrs'] = jsons.dump(vm)
         return r
 
-class DiskUsageMetrics(PSUtilMetric):
+class DiskUsageMetrics(BaseMetric):
     def __init__(self, mountpoint):
         super(DiskUsageMetrics, self).__init__()
         self.name = "Disk Usage"
