@@ -1,7 +1,7 @@
 # metrics2mqtt
 Publish cross-platorm system performance metrics to a MQTT broker.
 
-`metrics2mqtt` is a lightweight wrapper around [psutil](https://pypi.org/project/psutil/) that publishes CPU utilization, free memory, and other system-level stats to a MQTT broker. The primary use case is to collect m system performance metrics for ingestion into [Home Assistant](https://www.home-assistant.io/) (HA) for alerting, reporting, and firing off any number of automations. However, given the minimal nature of this code, it could be used other purposes as well.
+`metrics2mqtt` is a lightweight wrapper around [psutil](https://pypi.org/project/psutil/) that publishes CPU utilization, free memory, and other system-level stats to a MQTT broker. The primary use case is to collect system performance metrics for ingestion into [Home Assistant](https://www.home-assistant.io/) (HA) for alerting, reporting, and firing off any number of automations. However, given the minimal nature of this code, it could be used other purposes as well.
 
 This project is intended to be an alternative to the (very good) [Glances](https://github.com/nicolargo/glances) project. The primary design difference is that the Glances integration into Home Assistant relies on periodically polling a RESTful API. However, the pub/sub model of [MQTT](http://mqtt.org/)--which is already widely used in the home automation community--is an ideal fit for real-time reporting of this type of data. Additionally `metrics2mqtt` can be very lightweight because it omits the GUI and alerting elements of Glances (which are redundant when used in conjunction with HA).
 
