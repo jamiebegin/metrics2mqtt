@@ -98,12 +98,12 @@ class MQTTMetrics(object):
         while True:
             x = 0
             while x < self.interval:
-                time.sleep(1)
+                # Check the queue for deferred results one/sec
+                time.sleep(1) 
                 self._check_queue()
                 x += 1
             for metric in self.metrics:
                 is_deferred = metric.poll(result_queue=self.cpu_metrics_queue)
-                print(metric)
                 if not is_deferred:
                     self._publish_metric(metric)
 def main():
