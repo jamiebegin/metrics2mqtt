@@ -170,7 +170,7 @@ def main():
             net = NetworkMetrics(n,i)
             stats.add_metric(net)
 
-    if not (args.vm or args.cpu or args.du):
+    if not (args.vm or args.cpu or args.du or args.net):
         logger.warning("No metrics specified. Nothing will be published.")
 
     stats.connect()
