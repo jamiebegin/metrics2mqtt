@@ -34,7 +34,7 @@ This will install the latest release of `metrics2mqtt`, create the necessary MQT
 `metrics2mqtt` is cross-platform and has been tested to work on CentOS, Ubuntu, Windows 10, and Raspbian (Raspberry Pi). **Python 3.6 (or above) is recommended.**
 
 ## Running in the Background (Daemonizing)
-`metrics2mqtt` runs as a foreground task at the command prompt. In order to run in the program in the background, or automatically at boot, the process has to be daemonized. The easiest way to do this is on a UNIX-like OS (Linux/BSD) is with [Supervisor](http://supervisord.org/). A sample Supervisor configuration file for `metrics2mqtt` will be included in future releases of the application.
+`metrics2mqtt` runs as a foreground task at the command prompt. In order to run in the program in the background, or automatically at boot, the process has to be daemonized. The easiest way to do this is on a UNIX-like OS (Linux/BSD) is with [Supervisor](http://supervisord.org/). An example Supervisor configuration file for `metrics2mqtt is included in the [/contrib/](contrib/) directory.
 
 I am not familiar with how to daemonize a Python process as a Windows service. But I do know that it is possible with enough Googling. Documentation and code pull requests are very much welcome--especially on this topic.
 
