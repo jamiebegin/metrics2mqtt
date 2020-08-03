@@ -10,7 +10,7 @@ import json, jsons
 import paho.mqtt.client as mqtt
 import psutil
 
-from metrics2mqtt.metrics import CPUMetrics, VirtualMemoryMetrics, DiskUsageMetrics
+from metrics2mqtt.metrics import CPUMetrics, VirtualMemoryMetrics, DiskUsageMetrics, NetworkMetrics
 
 logger = logging.getLogger('metrics2mqtt')
 logger.setLevel(logging.DEBUG)
@@ -120,7 +120,8 @@ def main():
     parser.add_argument("--vm", help="Publish virtual memory", action="store_true")
     parser.add_argument("--du", help="Publish disk usage metrics", type=str, action="append", 
                         nargs="?", const='/', default=None, metavar='MOUNT')
-
+    parser.add_argument("--net", help="Publish network interface metrics", type=str, action="append", 
+                        nargs="?", const='/', default=None, metavar='NIC')
 
     args = parser.parse_args()
     system_name = args.name
@@ -157,6 +158,12 @@ def main():
         for mountpoint in args.du:
             du = DiskUsageMetrics(mountpoint=mountpoint)
             stats.add_metric(du)
+
+    if args.net:
+        for nic in args.net:
+            n, i = nic.split(',')
+            net = NetworkMetrics(n,int(i))
+            stats.add_metric(net)
 
     if not (args.vm or args.cpu or args.du):
         logger.warning("No metrics specified. Nothing will be published.")

@@ -1,6 +1,8 @@
+import time
 import threading, queue
 import json, jsons
 import psutil
+from numpy import array, diff, average
 
 class BaseMetric(object):
     def __init__(self, *args, **kwargs):
@@ -106,6 +108,78 @@ class DiskUsageMetrics(BaseMetric):
         config_topic = {
             'name': system_name + ' Disk Usage (' + self.mountpoint + ' Volume)',
             'unique_id': sn + '_disk_usage_' + n,
+            'qos': 1,
+            'icon': self.icon,
+            'unit_of_measurement': self.unit_of_measurement,
+            'availability_topic': t['avail'],
+            'json_attributes_topic': t['attrs'],
+            'state_topic': t['state']}
+        return config_topic
+
+class NetworkMetricThread(threading.Thread):
+    def __init__(self, result_queue, metric):
+        threading.Thread.__init__(self)
+        self.result_queue = result_queue
+        self.metric = metric
+
+    def run(self):
+        """
+        'eth0': netio(bytes_sent=485291293, bytes_recv=6004858642, packets_sent=3251564, packets_recv=4787798, errin=0, errout=0, dropin=0, dropout=0),
+        'lo': netio(bytes_sent=2838627, bytes_recv=2838627, packets_sent=30567, packets_recv=30567, errin=0, errout=0, dropin=0, dropout=0)}
+        """        
+        r = {}
+        x = 0
+        interval = self.metric.interval
+        tx_bytes = []
+        rx_bytes = []
+        while x < interval:
+            nics = psutil.net_io_counters(pernic=True)
+            if self.metric.nic in nics:
+                tx_bytes.append(nics[self.metric.nic].bytes_sent)
+                rx_bytes.append(nics[self.metric.nic].bytes_recv)
+            time.sleep(1)
+            x += 1
+        tx_rate_bytes_sec = average(diff(array(tx_bytes)))
+        tx_rate = tx_rate_bytes_sec / 125.0 # bytes/sec to kilobits/sec
+        rx_rate_bytes_sec = average(diff(array(rx_bytes)))
+        rx_rate = rx_rate_bytes_sec / 125.0 # bytes/sec to kilobits/sec
+
+        r['state'] = "{:.1f}".format(tx_rate + rx_rate)
+        r['attrs'] = jsons.dump(nics[self.metric.nic])
+        r['attrs'].update({'tx_rate': float("{:.2f}".format(tx_rate)), 'rx_rate': float("{:.2f}".format(rx_rate))})
+        self.metric.polled_result = r
+        self.result_queue.put(self.metric)
+
+class NetworkMetrics(BaseMetric):
+    def __init__(self, nic, interval):
+        super(NetworkMetrics, self).__init__()
+        self.name = "Network Throughput"
+        self.icon = "mdi:server-network"
+        self.interval = interval
+        self.result_queue = None
+        self.unit_of_measurement = "kb/s"
+        self.nic = nic        
+
+    def poll(self, result_queue=None):
+        self.result_queue = result_queue
+        th = NetworkMetricThread(result_queue=result_queue, metric=self)
+        th.daemon = True
+        th.start()
+        return True # Expect a deferred result
+
+    def get_config_topic(self, topic_prefix, system_name):
+        sn = self.sanitize(system_name)
+        n = self.sanitize(self.nic)
+        t = {}
+        t['state'] = "{}/sensor/{}/net_{}/state".format(topic_prefix, sn, n)
+        t['config'] = "{}/sensor/{}/net_{}/config".format(topic_prefix, sn, n)
+        t['avail'] = "{}/sensor/{}/net_{}/availability".format(topic_prefix, sn, n)
+        t['attrs'] = "{}/sensor/{}/net_{}/attributes".format(topic_prefix, sn, n)
+        self.topics = t
+        
+        config_topic = {
+            'name': system_name + ' Network (' + self.nic + ')',
+            'unique_id': sn + '_net_' + n,
             'qos': 1,
             'icon': self.icon,
             'unit_of_measurement': self.unit_of_measurement,

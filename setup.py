@@ -22,6 +22,7 @@ setup(
           'jsons',
           'psutil',
           'paho-mqtt',
+          'numpy'
       ],
   zip_safe = False,
   classifiers=[
