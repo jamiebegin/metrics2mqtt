@@ -123,10 +123,6 @@ class NetworkMetricThread(threading.Thread):
         self.metric = metric
 
     def run(self):
-        """
-        'eth0': netio(bytes_sent=485291293, bytes_recv=6004858642, packets_sent=3251564, packets_recv=4787798, errin=0, errout=0, dropin=0, dropout=0),
-        'lo': netio(bytes_sent=2838627, bytes_recv=2838627, packets_sent=30567, packets_recv=30567, errin=0, errout=0, dropin=0, dropout=0)}
-        """        
         r = {}
         x = 0
         interval = self.metric.interval
