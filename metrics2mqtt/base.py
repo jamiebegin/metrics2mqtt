@@ -70,9 +70,6 @@ class MQTTMetrics(object):
             self.client.publish(metric.topics['config'], json.dumps(config_topic), retain=True, qos=1)
             self._report_status(metric.topics['avail'], True)
 
-    def clean(self):
-        raise NotImplementedError("Clean function doesn't work yet.")
-
     def add_metric(self, metric):
         self.metrics.append(metric)
 
@@ -104,8 +101,6 @@ class MQTTMetrics(object):
                     self._publish_metric(metric)
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--clean", help="Clean up retained MQTT messages and stuff and exit (NOT IMPLEMENTED YET)", action="store_true")
-    parser.add_argument("--config", help="Create MQTT config topic and exit", action="store_true")
     parser.add_argument('--name', default=socket.gethostname(),
                     help='A descriptive name for the computer being monitored (default: hostname)')
     parser.add_argument('--broker', default="localhost",
@@ -165,14 +160,9 @@ def main():
 
     if not (args.vm or args.cpu or args.du):
         logger.warning("No metrics specified. Nothing will be published.")
-    stats.connect()
 
-    if args.clean:
-        stats.clean()
-    elif args.config:
-        stats.create_config_topic(exit=True)
-    else:
-        stats.monitor()
+    stats.connect()
+    stats.monitor()
 
 if __name__ == "__main__":
     main()
