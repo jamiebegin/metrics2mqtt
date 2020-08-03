@@ -120,7 +120,7 @@ def main():
     parser.add_argument("--vm", help="Publish virtual memory", action="store_true")
     parser.add_argument("--du", help="Publish disk usage metrics", type=str, action="append", 
                         nargs="?", const='/', default=None, metavar='MOUNT')
-    parser.add_argument("--net", help="Publish network interface metrics", type=str, action="append", 
+    parser.add_argument("--net", help="Publish network interface metrics. Specify the interface name and collection interval seperated by a comma", type=str, action="append", 
                         nargs="?", const='/', default=None, metavar='NIC')
 
     args = parser.parse_args()
@@ -161,8 +161,13 @@ def main():
 
     if args.net:
         for nic in args.net:
-            n, i = nic.split(',')
-            net = NetworkMetrics(n,int(i))
+            try:
+                n, i = nic.split(',')
+                i = int(i)
+            except ValueError:
+                n = nic
+                i = 15
+            net = NetworkMetrics(n,i)
             stats.add_metric(net)
 
     if not (args.vm or args.cpu or args.du):
