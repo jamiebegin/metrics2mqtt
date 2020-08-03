@@ -16,7 +16,7 @@ This will install the latest release of `metrics2mqtt`, create the necessary MQT
 `metrics2mqtt`requires Python 3.6 or above. If your default Python version is older, you may have to explictly specify the `pip` version by using `pip3` or `pip-3`.
 
  - The `--name` parameter is used for the friendly name of the sensor in Home Assistant and for the MQTT topic names. If not specified, it defaults to the hostname of the machine.
- - Instantaneous CPU utilization isn't all that informative. It's normal for a CPU to occasionally spike to 100% for a few moments and means that the chip is being utilized to its full potential. However, if the CPU stays pegged at/near 100% over a longer period of time, it is indicative of a bottleneck. The `--cpu=60` parameter is the observation interval for the CPU metrics. Here CPU metrics are gathered for 60 seconds and then the average value is published to MQTT state topic for the sensor. A good value for this option is anywhere between 60 and 1800 seconds (1 to 15 minutes), depending on typical workloads.
+ - Instantaneous CPU utilization isn't all that informative. It's normal for a CPU to occasionally spike to 100% for a few moments and means that the chip is being utilized to its full potential. However, if the CPU stays pegged at/near 100% over a longer period of time, it is indicative of a bottleneck. The `--cpu=60` parameter is the collection interval for the CPU metrics. Here CPU metrics are gathered for 60 seconds and then the average value is published to MQTT state topic for the sensor. A good value for this option is anywhere between 60 and 1800 seconds (1 to 15 minutes), depending on typical workloads.
  - The `--vm` flag indicates that virtual memory (RAM) metrics should also be published.
  - `-vvvvv` (five v's) specifies debug-level logging to the console. Reduce the quantity of v's to reduce the logging verbosity.
  
@@ -29,6 +29,17 @@ This will install the latest release of `metrics2mqtt`, create the necessary MQT
 #### Example
 
 `metrics2mqtt --name Server1 -vvvvv --cpu=60 --vm --du='/var/spool' --du='/'`
+
+### Network Throughput
+Network throughput (amount of traffic) metrics are also available. Using one or more `--net` parameters, specify the interface name and the collection interval (as discussed in the CPU metrics documenation), seperated by a comma. A seperate MQTT topic is created for each interface and each will appear as a seperate sensor in HA.
+
+The sensor state equals average throughput of the interface during the collection interval (combining both transmit and receive) in kilobits per second. More detail is available in the state attributes, such as: individual TX and RX rates, number of packets, total bytes sent and received, etc. Except for TX and RX rates, all attribute values are total accumulated values since the interface was reset. Thus, expect to see very large numbers if the interface has been online a while.
+
+#### Example
+
+`metrics2mqtt --name Server1 -vvvvv --interval 60 --net=eth0,15`
+
+This will publish network throughput information about Server1's `eth0` interface to the MQTT broker once every 60 seconds. The sensor state will equal the average network throughput over the previous 15 seconds.
 
 ## Compatibility
 `metrics2mqtt` is cross-platform and has been tested to work on CentOS, Ubuntu, Windows 10, and Raspbian (Raspberry Pi). **Python 3.6 (or above) is recommended.**
