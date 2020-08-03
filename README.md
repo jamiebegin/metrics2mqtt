@@ -13,8 +13,10 @@ metrics2mqtt --name MyServerName --cpu=60 --vm -vvvvv
 ```
 This will install the latest release of `metrics2mqtt`, create the necessary MQTT topics, and start sending virtual memory and CPU utilization metrics. The MQTT broker is assumed to be running on `localhost`. If your broker is running on a different host, specify the hostname or IP address using the `--broker` parameter.
 
- - The `--name` parameter is used for the friendly name of the sensor in Home Assistant and for the MQTT topic names. It is the only required parameter.
- - Instantaneous CPU utilization isn't all that informative. It's normal for a CPU to occasionally spike to 100% for a few moments and means that the chip is being utilized to its full potential. However, if the CPU stays pegged at/near 100% over a longer period of time, it is an indication of a bottleneck. The `--cpu=60` parameter is the observation interval for the CPU metrics. Here CPU metrics are gathered for 60 seconds and then the average value is published to MQTT state topic for the sensor. A good value for this option is anywhere between 60 and 1800 seconds (1 to 15 minutes), depending typical workloads.
+`metrics2mqtt`requires Python 3.6 or above. If your default Python version is older, you may have to explictly specify the `pip` version by using `pip3` or `pip-3`.
+
+ - The `--name` parameter is used for the friendly name of the sensor in Home Assistant and for the MQTT topic names. If not specified, it defaults to the hostname of the machine.
+ - Instantaneous CPU utilization isn't all that informative. It's normal for a CPU to occasionally spike to 100% for a few moments and means that the chip is being utilized to its full potential. However, if the CPU stays pegged at/near 100% over a longer period of time, it is an indication of a bottleneck. The `--cpu=60` parameter is the observation interval for the CPU metrics. Here CPU metrics are gathered for 60 seconds and then the average value is published to MQTT state topic for the sensor. A good value for this option is anywhere between 60 and 1800 seconds (1 to 15 minutes), depending on typical workloads.
  - The `--vm` flag indicates that virtual memory (RAM) metrics should also be published.
  - `-vvvvv` (five v's) specifies debug-level logging to the console. Reduce the quantity of v's to reduce the logging verbosity.
  
@@ -42,7 +44,7 @@ Once `metrics2mqtt` is collecting data and publishing it to MQTT, it's rather tr
 A few assumptions:
 - **Home Assistant is already configured to use a MQTT broker.** Setting up MQTT and HA is beyond the scope of this documentation. However, there are a lot of great tutorials on YouTube. Either the (recently deprecated) internal broker, or preferably an external broker like [Mosquitto](https://mosquitto.org/) will need to be installed and the HA MQTT intergration configured. I run both HA and Mosquitto in separate Docker containers on the same host and the config works well.
 - **The HA MQTT integration is configured to use `homeassistant` as the MQTT autodiscovery prefix.** This is the default for the integration and also the default for `metrics2mqtt`. If you have changed this from the default, use the `--prefix` parameter to specify the correct one.
-- **You're not using any authentication or TLS to connect to the broker.** Currently `metrics2mqtt` only works with anonymous connections. User name / password authentication is fairly trivial to implement, but TLS encryption is less-so. If this is a feature you need, please post a feature request (or submit a pull request if you're the ambitious type).
+- **You're not using TLS to connect to the MQTT broker.** Currently `metrics2mqtt` only works with unencrypted connections. Username / password authentication can be specified with the `--username` and `--password` parameters, but TLS encryption is not yet supported. If this is a feature you need, please post a feature request (or submit a pull request if you're the ambitious type).
 
 Using the default prefix and a system name of `NUC` (the name of my server), the following state can be found in the "States" section of Developer Tools in HA:
 
