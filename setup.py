@@ -3,12 +3,12 @@ from setuptools import setup
 setup(
   name = 'metrics2mqtt',
   packages = ['metrics2mqtt'], 
-  version = '0.1.15',
+  version = '0.1.16',
   license='MIT', 
   description = 'Publish cross-platorm system performance metrics to a MQTT broker',
   author_email = 'jjbegin@gmail.com',
   url = 'https://github.com/jamiebegin/metrics2mqtt', 
-  download_url = 'https://github.com/jamiebegin/metrics2mqtt/archive/v0.1.15.tar.gz', 
+  download_url = 'https://github.com/jamiebegin/metrics2mqtt/archive/v0.1.16.tar.gz', 
   keywords = ['mqtt', 'psutil', 'metrics'], 
   setup_requires = [
     'wheel'
