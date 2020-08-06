@@ -50,17 +50,17 @@ class MQTTMetrics(object):
             self.connected = True
             return
         elif rc == 1:
-            logger.info("Connection refused – incorrect protocol version")
+            logger.error("Connection refused – incorrect protocol version")
         elif rc == 2:
-            logger.info("Connection refused – invalid client identifier")
+            logger.error("Connection refused – invalid client identifier")
         elif rc == 3:
-            logger.info("Connection refused – server unavailable")
+            logger.error("Connection refused – server unavailable")
         elif rc == 4:
-            logger.info("Connection refused – bad username or password")
+            logger.error("Connection refused – bad username or password")
         elif rc == 5:
-            logger.info("Connection refused – not authorised")
+            logger.error("Connection refused – not authorised")
         else:
-            logger.info("Connection refused")
+            logger.error("Connection refused")
         sys.exit(1)
 
     def _report_status(self, avail_topic, status):
