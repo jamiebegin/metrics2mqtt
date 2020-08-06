@@ -128,11 +128,22 @@ class NetworkMetricThread(threading.Thread):
         interval = self.metric.interval
         tx_bytes = []
         rx_bytes = []
+        prev_tx = 0; prev_rx = 0; base_tx = 0; base_rx = 0
         while x < interval:
             nics = psutil.net_io_counters(pernic=True)
             if self.metric.nic in nics:
-                tx_bytes.append(nics[self.metric.nic].bytes_sent)
-                rx_bytes.append(nics[self.metric.nic].bytes_recv)
+                tx = nics[self.metric.nic].bytes_sent
+                rx = nics[self.metric.nic].bytes_recv
+                if tx < prev_tx:
+                    # TX counter rollover
+                    base_tx += prev_tx
+                if rx < prev_rx:
+                    # RX counter rollover
+                    base_rx += prev_rx
+                tx_bytes.append(base_tx + tx)
+                rx_bytes.append(base_rx + rx)
+                prev_tx = tx
+                prev_rx = rx
             time.sleep(1)
             x += 1
         tx_rate_bytes_sec = average(diff(array(tx_bytes)))
@@ -142,7 +153,7 @@ class NetworkMetricThread(threading.Thread):
 
         r['state'] = "{:.1f}".format(tx_rate + rx_rate)
         r['attrs'] = jsons.dump(nics[self.metric.nic])
-        r['attrs'].update({'tx_rate': float("{:.2f}".format(tx_rate)), 'rx_rate': float("{:.2f}".format(rx_rate))})
+        r['attrs'].update({'tx_rate': float("{:.1f}".format(tx_rate)), 'rx_rate': float("{:.1f}".format(rx_rate))})
         self.metric.polled_result = r
         self.result_queue.put(self.metric)
 
