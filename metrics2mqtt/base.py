@@ -25,23 +25,43 @@ class MQTTMetrics(object):
         self.password = password
         self.topic_prefix = topic_prefix
         self.metrics = []
-        
+        self.connected = False
+
         signal.signal(signal.SIGTERM, self.sig_handle)
         signal.signal(signal.SIGINT, self.sig_handle)
         self.cpu_metrics_queue = queue.Queue()
 
     def connect(self):
         self.client = mqtt.Client(self.system_name + '_psutilmqtt')
-        try: 
+        try:
             if self.username or self.password:
                 self.client.username_pw_set(self.username, self.password)
+            self.client.on_connect = self.on_connect
             self.client.connect(self.broker_host)
-            logger.info("Connected to MQTT broker.")
             self.client.loop_start()
         except Exception as e:
             logger.error("Error while trying to connect to MQTT broker.")
             logger.error(str(e))
             raise
+
+    def on_connect(self, client, userdata, flags, rc):
+        if rc == 0:
+            logger.info("Connected to MQTT broker.")
+            self.connected = True
+            return
+        elif rc == 1:
+            logger.error("Connection refused – incorrect protocol version")
+        elif rc == 2:
+            logger.error("Connection refused – invalid client identifier")
+        elif rc == 3:
+            logger.error("Connection refused – server unavailable")
+        elif rc == 4:
+            logger.error("Connection refused – bad username or password")
+        elif rc == 5:
+            logger.error("Connection refused – not authorised")
+        else:
+            logger.error("Connection refused")
+        sys.exit(1)
 
     def _report_status(self, avail_topic, status):
         if status: status = 'online'
@@ -56,7 +76,7 @@ class MQTTMetrics(object):
         logger.warning("Shutting down gracefully.")
         for metric in self.metrics:
             self._report_status(metric.topics['avail'], False)
-        self.client.loop_stop() 
+        self.client.loop_stop()
         self.client.disconnect()
         sys.exit(exit_code)
 
@@ -87,18 +107,23 @@ class MQTTMetrics(object):
         self.client.publish(metric.topics['attrs'], attrs, retain=False, qos=1)
 
     def monitor(self):
+        while not self.connected:
+            logger.debug("Waiting for connection.")
+            time.sleep(1)
+
         self.create_config_topics()
         while True:
             x = 0
             while x < self.interval:
                 # Check the queue for deferred results one/sec
-                time.sleep(1) 
+                time.sleep(1)
                 self._check_queue()
                 x += 1
             for metric in self.metrics:
                 is_deferred = metric.poll(result_queue=self.cpu_metrics_queue)
                 if not is_deferred:
                     self._publish_metric(metric)
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--name', default=socket.gethostname(),
