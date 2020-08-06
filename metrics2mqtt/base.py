@@ -28,10 +28,10 @@ class MQTTMetrics(object):
         
         signal.signal(signal.SIGTERM, self.sig_handle)
         signal.signal(signal.SIGINT, self.sig_handle)
-        self.cpu_metrics_queue = queue.Queue()
+        self.deferred_metrics_queue = queue.Queue()
 
     def connect(self):
-        self.client = mqtt.Client(self.system_name + '_psutilmqtt')
+        self.client = mqtt.Client(self.system_name + '_metrics2mqtt')
         try: 
             if self.username or self.password:
                 self.client.username_pw_set(self.username, self.password)
@@ -74,8 +74,8 @@ class MQTTMetrics(object):
         self.metrics.append(metric)
 
     def _check_queue(self):
-        while not self.cpu_metrics_queue.empty():
-            queued_metric = self.cpu_metrics_queue.get()
+        while not self.deferred_metrics_queue.empty():
+            queued_metric = self.deferred_metrics_queue.get()
             self._publish_metric(queued_metric)
 
     def _publish_metric(self, metric):
@@ -96,7 +96,7 @@ class MQTTMetrics(object):
                 self._check_queue()
                 x += 1
             for metric in self.metrics:
-                is_deferred = metric.poll(result_queue=self.cpu_metrics_queue)
+                is_deferred = metric.poll(result_queue=self.deferred_metrics_queue)
                 if not is_deferred:
                     self._publish_metric(metric)
 def main():
