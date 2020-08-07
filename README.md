@@ -1,5 +1,5 @@
 # metrics2mqtt
-Publish cross-platorm system performance metrics to a MQTT broker.
+Publish cross-platform system performance metrics to a MQTT broker.
 
 [![PyPI version](https://badge.fury.io/py/metrics2mqtt.svg)](https://badge.fury.io/py/metrics2mqtt)
 
@@ -15,7 +15,7 @@ metrics2mqtt --name MyServerName --cpu=60 --vm -vvvvv
 ```
 This will install the latest release of `metrics2mqtt`, create the necessary MQTT topics, and start sending virtual memory and CPU utilization metrics. The MQTT broker is assumed to be running on `localhost`. If your broker is running on a different host, specify the hostname or IP address using the `--broker` parameter.
 
-`metrics2mqtt`requires Python 3.6 or above. If your default Python version is older, you may have to explictly specify the `pip` version by using `pip3` or `pip-3`.
+`metrics2mqtt` requires Python 3.6 or above. If your default Python version is older, you may have to explicitly specify the `pip` version by using `pip3` or `pip-3`.
 
  - The `--name` parameter is used for the friendly name of the sensor in Home Assistant and for the MQTT topic names. If not specified, it defaults to the hostname of the machine.
  - Instantaneous CPU utilization isn't all that informative. It's normal for a CPU to occasionally spike to 100% for a few moments and means that the chip is being utilized to its full potential. However, if the CPU stays pegged at/near 100% over a longer period of time, it is indicative of a bottleneck. The `--cpu=60` parameter is the collection interval for the CPU metrics. Here CPU metrics are gathered for 60 seconds and then the average value is published to MQTT state topic for the sensor. A good value for this option is anywhere between 60 and 1800 seconds (1 to 15 minutes), depending on typical workloads.
@@ -26,14 +26,14 @@ This will install the latest release of `metrics2mqtt`, create the necessary MQT
  
  ## Additional Metrics 
 ### Disk Usage
-`metrics2mqtt` can publish disk usage metrics using the `du` option. Multiple `du` options can be specified to monitor different volumes. Each volume will present as a separate sensor in Home Assistant. The sensor state reports the percentage of total volume space consumed. Additional data (total volume size in bytes, free bytes, and used bytes) are accessable as state attributes on each sensor.
+`metrics2mqtt` can publish disk usage metrics using the `du` option. Multiple `du` options can be specified to monitor different volumes. Each volume will present as a separate sensor in Home Assistant. The sensor state reports the percentage of total volume space consumed. Additional data (total volume size in bytes, free bytes, and used bytes) are accessible as state attributes on each sensor.
 
 #### Example
 
 `metrics2mqtt --name Server1 -vvvvv --cpu=60 --vm --du='/var/spool' --du='/'`
 
 ### Network Throughput
-Network throughput (amount of traffic) metrics are also available. Using one or more `--net` parameters, specify the interface name and the collection interval (as discussed in the CPU metrics documenation), seperated by a comma. A seperate MQTT topic is created for each interface and each will appear as a seperate sensor in HA.
+Network throughput (amount of traffic) metrics are also available. Using one or more `--net` parameters, specify the interface name and the collection interval (as discussed in the CPU metrics documentation), seperated by a comma. A seperate MQTT topic is created for each interface and each will appear as a seperate sensor in HA.
 
 The sensor state equals average throughput of the interface during the collection interval (combining both transmit and receive) in kilobits per second. More detail is available in the state attributes, such as: individual TX and RX rates, number of packets, total bytes sent and received, etc. Except for TX and RX rates, all attribute values are total accumulated values since the interface was reset. Thus, expect to see very large numbers if the interface has been online a while.
 
@@ -52,10 +52,10 @@ This will publish network throughput information about Server1's `eth0` interfac
 I am not familiar with how to daemonize a Python process as a Windows service. But I do know that it is possible with enough Googling. Documentation and code pull requests are very much welcome--especially on this topic.
 
 ## Using with Home Assistant (HA)
-Once `metrics2mqtt` is collecting data and publishing it to MQTT, it's rather trival to use the metrics in Home Assistant.
+Once `metrics2mqtt` is collecting data and publishing it to MQTT, it's rather trivial to use the metrics in Home Assistant.
 
 A few assumptions:
-- **Home Assistant is already configured to use a MQTT broker.** Setting up MQTT and HA is beyond the scope of this documentation. However, there are a lot of great tutorials on YouTube. Either the (recently deprecated) internal broker, or preferably an external broker like [Mosquitto](https://mosquitto.org/) will need to be installed and the HA MQTT intergration configured. I run both HA and Mosquitto in separate Docker containers on the same host and the config works well.
+- **Home Assistant is already configured to use a MQTT broker.** Setting up MQTT and HA is beyond the scope of this documentation. However, there are a lot of great tutorials on YouTube. Either the (recently deprecated) internal broker, or preferably an external broker like [Mosquitto](https://mosquitto.org/) will need to be installed and the HA MQTT integration configured. I run both HA and Mosquitto in separate Docker containers on the same host and the config works well.
 - **The HA MQTT integration is configured to use `homeassistant` as the MQTT autodiscovery prefix.** This is the default for the integration and also the default for `metrics2mqtt`. If you have changed this from the default, use the `--prefix` parameter to specify the correct one.
 - **You're not using TLS to connect to the MQTT broker.** Currently `metrics2mqtt` only works with unencrypted connections. Username / password authentication can be specified with the `--username` and `--password` parameters, but TLS encryption is not yet supported. If this is a feature you need, please post a feature request (or submit a pull request if you're the ambitious type).
 
@@ -63,11 +63,11 @@ Using the default prefix and a system name of `NUC` (the name of my server), the
 
 ![Home Assistant Developer Tools screenshot](https://github.com/jamiebegin/metrics2mqtt/blob/master/docs/dev_tools_example.png?raw=true)
 
-The state value is the overall CPU utilization as a percentage. A detailed breakdown of kernal vs userland time, I/O wait time, etc. appear as attributes. This can be tested in the template sandbox in the Developer Tools:
+The state value is the overall CPU utilization as a percentage. A detailed breakdown of kernel vs userland time, I/O wait time, etc. appear as attributes. This can be tested in the template sandbox in the Developer Tools:
 ```
-The NUC server recently had a CPU utlization of {{ states('sensor.nuc_cpu') }}%. This included executing user-space programs for {{state_attr('sensor.nuc_cpu', 'user')}}% of cycles.
+The NUC server recently had a CPU utilization of {{ states('sensor.nuc_cpu') }}%. This included executing user-space programs for {{state_attr('sensor.nuc_cpu', 'user')}}% of cycles.
 ```
-Which displays something similar to: `The NUC server recently had a CPU utlization of 3.1%. This included executing user-space programs for 1.9% of cycles.`
+Which displays something similar to: `The NUC server recently had a CPU utilization of 3.1%. This included executing user-space programs for 1.9% of cycles.`
 
 ### Lovelace Dashboards
 
