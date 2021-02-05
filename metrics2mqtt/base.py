@@ -17,10 +17,11 @@ logger.setLevel(logging.DEBUG)
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 class MQTTMetrics(object):
-    def __init__(self, system_name, interval, broker_host, username, password, topic_prefix):
+    def __init__(self, system_name, interval, broker_host, broker_port, username, password, topic_prefix):
         self.system_name = system_name
         self.interval = interval
         self.broker_host = broker_host
+        self.broker_port = broker_port
         self.username = username
         self.password = password
         self.topic_prefix = topic_prefix
@@ -37,7 +38,7 @@ class MQTTMetrics(object):
             if self.username or self.password:
                 self.client.username_pw_set(self.username, self.password)
             self.client.on_connect = self.on_connect
-            self.client.connect(self.broker_host)
+            self.client.connect(self.broker_host, self.broker_port)
             self.client.loop_start()
         except Exception as e:
             logger.error("Error while trying to connect to MQTT broker.")
@@ -130,6 +131,8 @@ def main():
                     help='A descriptive name for the computer being monitored (default: hostname)')
     parser.add_argument('--broker', default="localhost",
                     help='Hostname or IP address of the MQTT broker (default: localhost)')
+    parser.add_argument('--port', default=1883, type=int,
+                    help='Port of the MQTT broker (default: 1883)')
     parser.add_argument('--username', default=None,
                     help='Username for MQTT broker authentication (default: None)')
     parser.add_argument('--password', default=None,
@@ -151,6 +154,7 @@ def main():
     args = parser.parse_args()
     system_name = args.name
     broker_host = args.broker
+    broker_port = args.port
     topic_prefix = args.prefix
     interval = args.interval
     username = args.username
@@ -171,7 +175,7 @@ def main():
         ch.setFormatter(formatter)
         logger.addHandler(ch)
 
-    stats = MQTTMetrics(system_name, interval, broker_host, username, password, topic_prefix)
+    stats = MQTTMetrics(system_name, interval, broker_host, broker_port, username, password, topic_prefix)
     if args.cpu:
         cpu = CPUMetrics(interval=args.cpu)
         stats.add_metric(cpu)
