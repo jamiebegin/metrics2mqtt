@@ -15,7 +15,7 @@
 		<string>/usr/local/bin/metrics2mqtt</string>
 		<string>--name=xxxxxxxx</string>
 		<string>--cpu=60</string>
-		<string>--du="/"</string> 
+		<string>--du=/</string> 
 		<string>--vm</string> 
 		<string>-vvvv</string>
 		<string>--broker</string>
