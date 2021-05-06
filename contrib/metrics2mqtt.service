@@ -5,13 +5,14 @@
 # 2. As root, copy this file to /etc/system.d/system/metrics2mqtt.service
 # 3. Test the service with: sudo systemctl enable metrics2mqtt.service
 # 4. To always run on boot, use: sudo systemctl enable metrics2mqtt.service
+# 5. If you have installed with 'sudo pip3 install metrics2mqtt', change working directory to /usr/local/bin/
 
 [Unit]
 Description=Publish cross-platorm system performance metrics to a MQTT broker.
 After=network.target
 
 [Service]
-ExecStart=/home/USERNAME/.local/bin/metrics2mqtt --cpu=60 --vm --du="/" -vvvv
+ExecStart=metrics2mqtt --cpu=60 --vm --du="/" -vvvv
 WorkingDirectory=/home/USERNAME/.local/bin
 StandardOutput=inherit
 StandardError=inherit
