@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Disabled</key>
+	<false/>
+	<key>KeepAlive</key>
+	<false/>
+	<key>Label</key>
+	<string>com.jamiebegin.metrics2mqtt.service</string>
+	<key>LaunchOnlyOnce</key>
+	<true/>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/usr/local/bin/metrics2mqtt</string>
+		<string>--name=xxxxxxxx</string>
+		<string>--cpu=60</string>
+		<string>--du=/</string> 
+		<string>--vm</string> 
+		<string>-vvvv</string>
+		<string>--broker</string>
+		<string>x.x.x.x</string> 
+		<string>--username</string>
+		<string>xxxxx</string>
+		<string>--password</string>
+		<string>xxxxxx</string>
+	</array>
+        <key>RunAtLoad</key>
+	<true/>
+</dict>
+</plist>
